@@ -10,6 +10,11 @@
 #include<err.h>
 #include<pwd.h>
 
+void closePipe(int fd[]){
+    close(fd[0]);
+    close(fd[1]);
+}
+
 int main(){
     printf("hello from main\n");
     const int BUF_SIZE = 20;
@@ -30,6 +35,7 @@ int main(){
     if (fstat(fd[1], &statBuf) == -1)
     {
         perror("Failed to get stat\n");
+        closePipe(fd);
         return 1;
     }
     uid = statBuf.st_uid;
@@ -48,7 +54,7 @@ int main(){
         int w = write(fd[1],msg[i],sizeof(msg[0]));
         if(w==-1){
             perror("Failed to write to pipe");
-            close(fd[1]);
+            closePipe(fd);
             return 1;
         }
         printf("Wrote [%d] Bytes to pipe\n",w);
@@ -64,8 +70,7 @@ int main(){
         int w = write(fd[1],&t,sizeof(char));
         if(w==-1){
             perror("Failed to write to pipe");
-            close(fd[0]);
-            close(fd[1]);
+            closePipe(fd);
             return 1;
         }
         totalBytesWrote+=w;
@@ -75,6 +80,7 @@ int main(){
     int offt;
     if(offt = lseek(fd[1],10,SEEK_CUR) && offt!=-1){
         perror("Failed to change offset");
+        closePipe(fd);
         return 1;
     }
     printf("Current offset is [%d]\n",offt);
@@ -86,7 +92,7 @@ int main(){
         int r = read(fd[0],buffer,sizeof(buffer));
         if(r==-1){
             perror("Pipe read failed\n");
-            close(fd[0]);
+            closePipe(fd);
             return 1;
         }
         printf("Read [%d] bytes from pipe: [%s]\n",r,buffer);
