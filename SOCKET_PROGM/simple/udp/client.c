@@ -11,7 +11,6 @@
 
 #define SERVER_IP_ADDRESS "127.0.0.1"
 #define SERVER_PORT 2000
-#define MAX_TCP_BUF 1000
 
 int main()
 {
@@ -20,7 +19,7 @@ int main()
     socklen_t sockaddr_len = sizeof(struct sockaddr);
     Student student;             // Data to sent (req)
     StudentDetail studentDetail; // Response to receive (res)
-    int bytes_send, bytes_received;
+    int bytes_sent, bytes_received;
     struct hostent *dest = (struct hostent *)gethostbyname(SERVER_IP_ADDRESS);
     printf("Server addr is %s\n", dest->h_name);
     int fd_socket_client = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -44,19 +43,29 @@ int main()
         close(fd_socket_client);
         return 1;
     }
-    do
+    while (1)
     {
         printf("Enter age\n");
         fscanf(stdin, "%d", &student.age);
         printf("Enter name\n");
         scanf("%s", student.name);
-        bytes_send = sendto(fd_socket_client, &student, sizeof(Student), 0, (struct sockaddr *)&serveraddr, sockaddr_len);
-        printf("Sent [%d] bytes to server\n", bytes_send);
+        bytes_sent = sendto(fd_socket_client, &student, sizeof(Student), 0, (struct sockaddr *)&serveraddr, sockaddr_len);
+        if (bytes_sent == -1)
+        {
+            perror("Failed to sent request to server");
+            printf("Error: %d\n", errno);
+            break;
+        }
+        printf("Sent [%d] bytes to server\n", bytes_sent);
         bytes_received = recvfrom(fd_socket_client, (char *)&studentDetail, sizeof(StudentDetail), 0, (struct sockaddr *)&serveraddr, &sockaddr_len);
+        if (bytes_received == 0)
+        {
+            perror("Received close request from server\n");
+            break;
+        }
         printf("Received [%d] bytes from server\n", bytes_received);
         printf("Res from server is:%s\n", studentDetail.desc);
-    } while (bytes_received != 0);
-
+    }
     printf("Closing the connection\n");
     close(fd_comm_client);
     return 0;

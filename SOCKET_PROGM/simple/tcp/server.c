@@ -57,11 +57,6 @@ int main()
     while (1)
     {
 
-        // FD_ZERO(&readfdset);
-        // FD_SET(fd_socket_server, &readfdset);
-        // select(fd_socket_server + 1, &readfdset, 0, 0, 0);
-        // if (FD_ISSET(fd_socket_server, &readfdset))
-        // {
         printf("Blocked on access call\n");
         fd_comm = accept(fd_socket_server, (struct sockaddr *)&clientaddr, &sockaddr_len);
         if (fd_comm == -1)
@@ -111,7 +106,6 @@ int main()
             }
             printf("Server sent %d bytes to client\n", bytes_sent);
         }
-        //}
     }
     close(fd_socket_server);
     return 0;
