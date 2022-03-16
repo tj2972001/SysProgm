@@ -35,7 +35,7 @@ int main()
     printf("Created Master server socket with fd: [%d]\n", fd_socket_server);
 
     serveraddr.sin_addr.s_addr = INADDR_ANY;
-    serveraddr.sin_port = (in_port_t)SERVER_PORT;
+    serveraddr.sin_port = htons(SERVER_PORT);
     serveraddr.sin_family = AF_INET;
 
     int bind_ret = bind(fd_socket_server, (struct sockaddr *)&serveraddr, sockaddr_len);
@@ -57,11 +57,6 @@ int main()
     while (1)
     {
 
-        // FD_ZERO(&readfdset);
-        // FD_SET(fd_socket_server, &readfdset);
-        // select(fd_socket_server + 1, &readfdset, 0, 0, 0);
-        // if (FD_ISSET(fd_socket_server, &readfdset))
-        // {
         printf("Blocked on access call\n");
         fd_comm = accept(fd_socket_server, (struct sockaddr *)&clientaddr, &sockaddr_len);
         if (fd_comm == -1)
@@ -111,7 +106,6 @@ int main()
             }
             printf("Server sent %d bytes to client\n", bytes_sent);
         }
-        //}
     }
     close(fd_socket_server);
     return 0;

@@ -34,10 +34,10 @@ int main()
     serveraddr.sin_port = SERVER_PORT;
     serveraddr.sin_addr = *((struct in_addr *)dest->h_addr_list[0]);
     // printf("Addr is %u\n", serveraddr.sin_addr);
-    printf("Blocking on connect\n");
     int fd_comm_client = connect(fd_socket_client, (struct sockaddr *)&serveraddr, sockaddr_len);
     if (fd_comm_client == -1)
     {
+        printf("%d\n", errno);
         perror("Failed to connect with server\n");
         close(fd_socket_client);
         return 1;
